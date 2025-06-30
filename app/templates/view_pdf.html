@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ver Documento - Zurich Pharma</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f9ff;
+      color: #333;
+    }
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(to bottom, #1a2a47, #223b60);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar h2 {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .sidebar a, .sidebar button {
+      display: block;
+      padding: 15px 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 15px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+    .sidebar a:hover, .sidebar button:hover {
+      background-color: #2c3e6a;
+    }
+    .dropdown-container {
+      display: none;
+      background-color: #2c3e6a;
+      padding-left: 10px;
+    }
+    .dropdown-container a {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+    .header {
+      margin-left: 250px;
+      height: 70px;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      background-color: #1a2a47;
+      color: white;
+      border-radius: 50%;
+      padding: 10px;
+      font-size: 18px;
+    }
+    .username {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .main {
+      margin-left: 250px;
+      padding: 30px;
+      height: calc(100vh - 70px);
+    }
+    .pdf-viewer {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .message {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Zurich Pharma</h2>
+    <a href="{{ url_for('documents.dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+    {% if 'Administradores' in [group.name for group in user.groups] %}
+      <button class="dropdown-btn"><i class="fas fa-folder-open"></i> Documentos <i class="fas fa-caret-down"></i></button>
+      <div class="dropdown-container">
+        <a href="{{ url_for('documents.dashboard_admin') }}?path=procesos">Procesos</a>
+        <a href="{{ url_for('documents.dashboard_admin') }}?type=formato">Formatos</a>
+        <a href="{{ url_for('documents.dashboard_admin') }}?tag=bitacora">Bitácoras</a>
+      </div>
+      <a href="{{ url_for('documents.trash') }}"><i class="fas fa-trash"></i> Papelera</a>
+    {% elif 'Documentadores' in [group.name for group in user.groups] %}
+      <button class="dropdown-btn"><i class="fas fa-folder-open"></i> Documentos <i class="fas fa-caret-down"></i></button>
+      <div class="dropdown-container">
+        <a href="{{ url_for('documents.dashboard_documentadores') }}?path=workflow">Workflows</a>
+        <a href="{{ url_for('documents.dashboard_documentadores') }}?type=reporte">Reportes</a>
+        <a href="{{ url_for('documents.dashboard_documentadores') }}?tag=documentacion">Documentación</a>
+      </div>
+    {% elif 'Departamentos' in [group.name for group in user.groups] %}
+      <button class="dropdown-btn"><i class="fas fa-folder-open"></i> Documentos <i class="fas fa-caret-down"></i></button>
+      <div class="dropdown-container">
+        <a href="{{ url_for('documents.dashboard_departamentos') }}?path=proyectos">Proyectos</a>
+        <a href="{{ url_for('documents.dashboard_departamentos') }}?type=plan">Planes</a>
+        <a href="{{ url_for('documents.dashboard_departamentos') }}?tag=colaboracion">Colaboración</a>
+      </div>
+    {% elif 'Usuarios' in [group.name for group in user.groups] %}
+      <button class="dropdown-btn"><i class="fas fa-folder-open"></i> Documentos <i class="fas fa-caret-down"></i></button>
+      <div class="dropdown-container">
+        <a href="{{ url_for('documents.dashboard_usuarios') }}?path=personales">Personales</a>
+        <a href="{{ url_for('documents.dashboard_usuarios') }}?type=nota">Notas</a>
+        <a href="{{ url_for('documents.dashboard_usuarios') }}?tag=tarea">Tareas</a>
+      </div>
+    {% endif %}
+    <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+  </div>
+  <div class="header">
+    <div></div>
+    <div class="user-profile">
+      <div class="avatar"><i class="fas fa-user"></i></div>
+      <span class="username">{{ user.username }}</span>
+    </div>
+  </div>
+  <div class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="message {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <h2>Ver Documento</h2>
+    <iframe class="pdf-viewer" src="{{ pdf_url }}#toolbar=0"></iframe>
+  </div>
+  <script>
+    const dropdown = document.querySelector(".dropdown-btn");
+    const container = document.querySelector(".dropdown-container");
+    dropdown.addEventListener("click", () => {
+      container.style.display = container.style.display === "none" ? "block" : "none";
+    });
+  </script>
+</body>
+</html>

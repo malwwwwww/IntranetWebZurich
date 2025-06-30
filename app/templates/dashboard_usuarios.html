@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Usuarios</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f9ff;
+      color: #333;
+    }
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(to bottom, #1a2a47, #223b60);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar h2 {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .sidebar a, .dropdown-btn {
+      display: block;
+      padding: 15px 20px;
+      color: #fff;
+      text-decoration: none;
+      background: none;
+      border: none;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .sidebar a:hover, .dropdown-btn:hover {
+      background-color: #2c3e6a;
+      color: #fff;
+    }
+    .dropdown-container {
+      display: none;
+      background-color: #2f436c;
+      padding-left: 20px;
+    }
+    .dropdown-container a {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+    .header {
+      margin-left: 250px;
+      height: 70px;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .search-container {
+      display: flex;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 30px;
+      border: 1px solid #cbd5e1;
+      width: 350px;
+      gap: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .search-container i {
+      color: #64748b;
+      font-size: 16px;
+    }
+    .search-container input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex-grow: 1;
+      font-size: 14px;
+      color: #334155;
+    }
+    .search-container button {
+      background-color: #1a2a47;
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .search-container button:hover {
+      background-color: #0f172a;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      background-color: #1a2a47;
+      color: white;
+      border-radius: 50%;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .username {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .main {
+      margin-left: 250px;
+      padding: 30px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+    .filters select {
+      background-color: #ffffff;
+      border: 1px solid #93c5fd;
+      padding: 10px 16px;
+      border-radius: 8px;
+      color: #1e3a8a;
+      cursor: pointer;
+      font-size: 14px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .filters select:hover {
+      border-color: #1e3a8a;
+      box-shadow: 0 0 5px rgba(30,58,138,0.2);
+    }
+    .filters button {
+      background-color: #1a2a47;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .filters button:hover {
+      background-color: #0f172a;
+    }
+    .document-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background-color: #fff;
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      padding: 15px 20px;
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .tag {
+      background-color: #1a2a47;
+      color: #fff;
+      padding: 4px 10px;
+      font-size: 12px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border-radius: 4px;
+    }
+    .card h4 {
+      color: #1a2a47;
+      margin-bottom: 12px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .card p {
+      font-size: 13px;
+      color: #555;
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+    .label {
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .actions i {
+      color: #1a2a47;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .actions i:hover {
+      color: #0f172a;
+    }
+    .message {
+      padding: 12px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Zurich Pharma</h2>
+    <a href="{{ url_for('documents.dashboard_usuarios') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <button class="dropdown-btn"><i class="fas fa-folder-open"></i> Documentos <i class="fas fa-caret-down" style="float: right"></i></button>
+    <div class="dropdown-container">
+      <a href="{{ url_for('documents.dashboard_usuarios') }}?path=procesos">Procesos</a>
+      <a href="{{ url_for('documents.dashboard_usuarios') }}?type=formato">Formatos</a>
+      <a href="{{ url_for('documents.dashboard_usuarios') }}?tag=bitacora">Bitácoras</a>
+    </div>
+    <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+  </div>
+  <div class="header">
+    <div class="search-container">
+      <form method="GET" action="{{ url_for('documents.dashboard_usuarios') }}">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" placeholder="Buscar documento..." value="{{ request.args.get('search', '') }}">
+        <button type="submit">Buscar</button>
+      </form>
+    </div>
+    <div class="user-profile">
+      <div class="avatar"><i class="fas fa-user"></i></div>
+      <span class="username">{{ user.username }}</span>
+    </div>
+  </div>
+  <div class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="message {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <div class="filters">
+      <form method="GET" action="{{ url_for('documents.dashboard_usuarios') }}">
+        <select name="tag" id="filter-tag">
+          <option value="">Etiqueta</option>
+          {% for tag in tags %}
+            <option value="{{ tag.id }}" {% if request.args.get('tag') == tag.id|string %}selected{% endif %}>{{ tag.name }}</option>
+          {% endfor %}
+        </select>
+        <select name="type" id="filter-type">
+          <option value="">Tipo</option>
+          {% for doc_type in document_types %}
+            <option value="{{ doc_type.name }}" {% if request.args.get('type') == doc_type.name %}selected{% endif %}>{{ doc_type.name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Aplicar Filtros</button>
+      </form>
+    </div>
+    <div class="document-grid">
+      {% for doc in documents %}
+        <div class="card"
+             data-preview-id="{{ doc.id }}"
+             data-tag="{{ doc.tags[0]|lower if doc.tags else 'sin etiqueta' }}"
+             data-type="{{ doc.type|lower }}"
+             data-path="{{ doc.path|lower }}"
+             data-date="{{ doc.created_date }}"
+             data-permissions="{{ doc.permissions|lower }}">
+          <div class="tag">{{ doc.tags[0] if doc.tags else 'Sin etiqueta' }}</div>
+          <h4>{{ doc.title }}</h4>
+          <p>{{ doc.created }} - {{ doc.pages }} página{{ 's' if doc.pages != 1 else '' }}</p>
+          <p><span class="label">Versión:</span> {{ doc.version }}</p>
+          <p><span class="label">Procedimiento:</span> {{ doc.procedure }}</p>
+          <p><span class="label">Propietario:</span> {{ doc.owner }}</p>
+          <div class="actions">
+            <a href="{{ url_for('documents.view_pdf', doc_id=doc.id) }}"><i class="fas fa-eye" title="Ver documento"></i></a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <script>
+    const dropdown = document.querySelector(".dropdown-btn");
+    const container = document.querySelector(".dropdown-container");
+    dropdown.addEventListener("click", () => {
+      container.style.display = container.style.display === "none" ? "block" : "none";
+    });
+  </script>
+</body>
+</html>

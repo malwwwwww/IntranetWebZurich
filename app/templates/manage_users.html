@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Usuarios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f9ff;
+            color: #333;
+        }
+        .container {
+            padding: 30px;
+            margin-left: 250px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gestionar Usuarios</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h3>Usuarios</h3>
+        <ul>
+            {% for user in users %}
+                <li>{{ user.username }} (Superusuario: {{ 'Sí' if user.is_superuser else 'No' }})</li>
+            {% endfor %}
+        </ul>
+        <h3>Grupos</h3>
+        <ul>
+            {% for group in groups %}
+                <li>{{ group.name }}</li>
+            {% endfor %}
+        </ul>
+        <p><a href="{{ url_for('documents.admin') }}">Volver al Dashboard</a></p>
+        <p><a href="{{ url_for('auth.logout') }}">Cerrar sesión</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Departamentos - Zurich Pharma</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f9ff;
+      color: #333;
+    }
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(to bottom, #1a2a47, #223b60);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar h2 {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .sidebar a, .sidebar button {
+      display: block;
+      padding: 15px 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 15px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+    .sidebar a:hover, .sidebar button:hover {
+      background-color: #2c3e6a;
+    }
+    .dropdown-container {
+      display: none;
+      background-color: #2c3e6a;
+      padding-left: 10px;
+    }
+    .dropdown-container a {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+    .header {
+      margin-left: 250px;
+      height: 70px;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      background-color: #1a2a47;
+      color: white;
+      border-radius: 50%;
+      padding: 10px;
+      font-size: 18px;
+    }
+    .username {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .main {
+      margin-left: 250px;
+      padding: 30px;
+    }
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .search-bar input, .search-bar select {
+      padding: 10px;
+      border: 1px solid #93c5fd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .document-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .document-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .document-card h3 {
+      color: #1a2a47;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .document-card p {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .actions a {
+      color: #1e3a8a;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .message {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Zurich Pharma</h2>
+    <a href="{{ url_for('documents.dashboard_departamentos') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <button class="dropdown-btn"><i class="fas fa-folder-open"></i> Documentos </i></button>
+    <div class="dropdown-container">
+      <a href="{{ url_for('documents.dashboard_departamentos') }}?path=proyectos">Proyectos</a>
+      <a href="{{ url_for('documents.dashboard_departamentos') }}?type=plan">Planes</a>
+      <a href="{{ url_for('documents.dashboard_departamentos') }}?tag=colaboracion">Colaboración</a>
+    </div>
+    <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+  </div>
+  <div class="header">
+    <div></div>
+    <div class="user-profile">
+      <div class="avatar"><i class="fas fa-user"></i></div>
+      <span class="username">{{ user.username }}</span>
+    </div>
+  </div>
+  <div class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="search-bar">
+      <form action="{{ url_for('documents.dashboard_departamentos') }}">
+        <input type="text" name="search" placeholder="Buscar documentos..." value="{{ request.args.get('search', '') }}">
+        <select name="tag">
+          <option value="">Seleccionar etiquetas</option>
+        {% for tag in tags %}
+          <option value="{{ tag.id }}" {% if tag.id|string == request.args.get('tag') %}selected{% endif %}>{{ tag.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="type">
+        <option value="">Todos los tipos</option>
+        {% for doc_type in document_types %}
+          <option value="{{ doc_type.id }}" {% if doc_type.id|string == request.args.get('type') %}selected{% endif %}>{{ doc_type.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Buscar</button>
+    </div>
+    </form>
+    <div class="document-grid">
+      {% for doc in documents %}
+        <div class="document-card">
+          <h3>{{ doc.title }}</h3>
+          <p><strong>Fecha:</strong> {{ doc.created }}</p>
+          <p><strong>Tipo:</strong> {{ doc.type }}</p>
+          <p><strong>Etiquetas:</strong> {{ doc.tags|join ', ') }}</p>
+          <p><strong>Propietario:</strong> {{ doc.owner }}</p>
+          <div class="actions">
+            <a href="{{ url_for('documents.view_pdf', doc_id=doc.id) }}"><i class="fas fa-eye" title="Ver documento"></i></a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <script>
+    const dropdown = document.querySelector(".dropdown-btn");
+    const container = document.querySelector(".dropdown-container");
+    dropdown.addEventListener("click", () => {
+      container.style.display = container.style.display === "none" ? "block" : "none";
+    });
+  </script>
+</body>
+</html>
